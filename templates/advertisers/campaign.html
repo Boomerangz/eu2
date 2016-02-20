@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel">
+                <header class="panel-heading">
+                    Кампании
+                </header>
+                <div class="panel-body">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th style="width: 10px">#</th>
+                            <th>Кампания</th>
+                            <th></th>
+                            <th style="width: 190px">Просмотры за этот месяц</th>
+                            <th style="width: 190px">Клики за этот месяц</th>
+                            <th style="width: 190px">CTR</th>
+                        </tr>
+                        <tr>
+                            <td>{{ campaign.id }}.</td>
+                            <td>{{ campaign.name }}</td>
+                            <td><a href="{{ campaign.url }}/">Ссылка</a></td>
+                            <td><span class="badge bg-green">{{ campaign.get_stats.shows }}</span></td>
+                            <td><span class="badge bg-blue">{{ campaign.get_stats.clicks }}</span></td>
+                            <td><span class="badge">{{ campaign.get_stats.ctr | floatformat:2 }}</span></td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- /.panel-body -->
+
+            </div>
+            <div class="panel">
+                <header class="panel-heading">
+                    Споты
+                </header>
+                <div class="panel-body">
+                    {% if campaign.banner_set.all %}
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="width: 10px">#</th>
+                                <th>Баннер</th>
+                                <th style="width: 190px">Просмотры за этот месяц</th>
+                                <th style="width: 190px">Клики за этот месяц</th>
+                                <th style="width: 190px">CTR</th>
+                            </tr>
+                            {% for banner in campaign.banner_set.all %}
+                                <tr>
+                                    <td>{{ banner.id }}.</td>
+                                    <td>{{banner.get_html |safe}}</td>
+                                    <td><span class="badge bg-green">{{ banner.get_stats.shows }}</span></td>
+                                    <td><span class="badge bg-blue">{{ banner.get_stats.clicks }}</span></td>
+                                    <td><span class="badge">{{ banner.get_stats.ctr | floatformat:2 }}</span></td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    {% else %}
+                        <span>
+                        У выбранной кампании нет созданных баннеров
+                        </span>
+                    {% endif %}
+                </div>
+                <!-- /.panel-body -->
+
+            </div>
+            <!-- /.panel -->
+
+            <!-- /.panel -->
+            <div class="col-md-13">
+                <!--earning graph start-->
+                <section class="panel">
+                    <header class="panel-heading">
+                        График статистики
+                    </header>
+                    <div class="panel-body">
+                        <canvas id="linechart" width="100%" height="330"></canvas>
+                    </div>
+                </section>
+                <!--earning graph end-->
+
+            </div>
+        </div>
+    </div><!-- /.col -->
+{% endblock %}
+{% block end_js %}
+    {{ block.super }}
+    <script src="/static/js/plugins/daterangepicker/daterangepicker.js" type="text/javascript"></script>
+
+    <script src="/static/js/plugins/chart.js" type="text/javascript"></script>
+
+    <!-- datepicker
+    <script src="/static/js/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>-->
+    <!-- Bootstrap WYSIHTML5
+    <script src="/static/js/plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js" type="text/javascript"></script>-->
+    <!-- iCheck -->
+    <script src="/static/js/plugins/iCheck/icheck.min.js" type="text/javascript"></script>
+    <!-- calendar -->
+    <script src="/static/js/plugins/fullcalendar/fullcalendar.js" type="text/javascript"></script>
+
+    <!-- Director App -->
+    <script src="/static/js/Director/app.js" type="text/javascript"></script>
+
+    <!-- Director dashboard demo (This is only for demo purposes) -->
+    <script src="/static/js/Director/dashboard.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $('input').on('ifChecked', function (event) {
+            // var element = $(this).parent().find('input:checkbox:first');
+            // element.parent().parent().parent().addClass('highlight');
+            $(this).parents('li').addClass("task-done");
+            console.log('ok');
+        });
+        $('input').on('ifUnchecked', function (event) {
+            // var element = $(this).parent().find('input:checkbox:first');
+            // element.parent().parent().parent().removeClass('highlight');
+            $(this).parents('li').removeClass("task-done");
+            console.log('not');
+        });
+
+    </script>
+    <script>
+        $('#noti-box').slimScroll({
+            height: '400px',
+            size: '5px',
+            BorderRadius: '5px'
+        });
+
+        $('input[type="checkbox"].flat-grey, input[type="radio"].flat-grey').iCheck({
+            checkboxClass: 'icheckbox_flat-grey',
+            radioClass: 'iradio_flat-grey'
+        });
+    </script>
+    <script type="text/javascript">
+        $(function () {
+            "use strict";
+            //BAR CHART
+            var data = {
+                labels: {{ campaign.get_stats_data.dates|safe }},
+                datasets: [
+                    {
+                        label: "My First dataset",
+                        fillColor: "rgba(220,220,220,0.2)",
+                        strokeColor: "rgba(220,220,220,1)",
+                        pointColor: "rgba(220,220,220,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(220,220,220,1)",
+                        data: {{ campaign.get_stats_data.shows|safe }}
+                    },
+                    {
+                        label: "My Second dataset",
+                        fillColor: "rgba(151,187,205,0.2)",
+                        strokeColor: "rgba(151,187,205,1)",
+                        pointColor: "rgba(151,187,205,1)",
+                        pointStrokeColor: "#fff",
+                        pointHighlightFill: "#fff",
+                        pointHighlightStroke: "rgba(151,187,205,1)",
+                        data: {{ campaign.get_stats_data.clicks|safe }}
+                    }
+                ]
+            };
+            new Chart(document.getElementById("linechart").getContext("2d")).Line(data, {
+                responsive: true,
+                maintainAspectRatio: false,
+            });
+
+        });
+        // Chart.defaults.global.responsive = true;
+    </script>
+{% endblock %}
