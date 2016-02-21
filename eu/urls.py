@@ -18,18 +18,24 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from eu import settings
+from eu.views import home
 from publishers.views.site_list import SiteList
 from django.conf.urls.static import static
 
 
 
 urlpatterns = patterns(
-
+    url('^asdasd/', RedirectView.as_view(url='/')),
+    url('^accounts/profile/', RedirectView.as_view(url='/')),
     url('^login/',
         auth_views.login,
         {'template_name': 'registration/login.html'}),
-    url('^accounts/profile/', RedirectView.as_view(url='/')),
     url(r'^publisher/', include('publishers.urls', namespace="publisher")),
     url(r'^advertiser/', include('advertisers.urls', namespace="advertiser")),
     url('^admin/', admin.site.urls),
+    url('', home),
 ) + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+
+
